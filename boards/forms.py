@@ -20,6 +20,7 @@ class PostForm(forms.ModelForm):
         fields = ['message', ]
 
 class GroupCreateForm(forms.ModelForm):
+    password = forms.CharField(max_length=32, widget=forms.PasswordInput)
     class Meta:
         model = Department
         fields = ['name', 'password']

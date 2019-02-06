@@ -33,7 +33,25 @@ def group_page(request,pk):
         print(group)
         if group == i:
             return render(request,'group_page.html',{'group':group})
-    return redirect('home')
+    return redirect('group_login')
+    
+@login_required
+def group_login(request):
+    user = request.user
+    if request.method == 'POST':
+        form = GroupCreateForm(request.POST)
+        if Department.objects.filter(name = request.POST['name']):
+            depa = Department.objects.get(name = request.POST['name'])
+            if depa.password == request.POST['password']:
+                user.belongs.add(depa)
+                return render(request,'group_page.html',{'group':depa})
+        else:
+            return redirect('group_login')
+
+    else:
+        form = GroupCreateForm()
+    return render(request, 'group_login.html', {'form': form})
+
 
 def board_topics(request,pk):
     board = get_object_or_404(Board, pk=pk)

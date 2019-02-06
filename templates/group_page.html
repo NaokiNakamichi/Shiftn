@@ -1,3 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}Sign up to Django Boards{% endblock %}
+
+{% block breadcrumb %}
+  <li class="breadcrumb-item active"> {{group.name}} </li>
+{% endblock %}
