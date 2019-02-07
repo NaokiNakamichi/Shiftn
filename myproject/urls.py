@@ -22,7 +22,8 @@ from boards import views
 urlpatterns = [
     path('', views.home, name='home'),
     path('boards/group_create',views.group_create,name='group_create'),
-    path('boards/group_create/<int:pk>',views.group_page,name='group_page'),
+    path('boards/group_page/<int:pk>',views.group_page,name='group_page'),
+    path('boards/group_page/<int:pk>/management/',views.shift_management,name='group_management'),
     path('boards/group_login/',views.group_login,name='group_login'),
     path('admin/', admin.site.urls),
     path('boards/<int:pk>/topics/<int:topic_pk>/reply/', views.reply_topic, name='reply_topic'),

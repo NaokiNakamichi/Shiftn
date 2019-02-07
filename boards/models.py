@@ -7,6 +7,12 @@ GENDER_CHOICES = (
     ('2', '男性'),
 )
 
+SHIFT_HOPE = (
+    ('1', '入れる○'),
+    ('2', '入れない✖︎'),
+    ('3', '微妙▲'),
+)
+
 class Board(models.Model):
     name = models.CharField(max_length=30, unique=True)
     description = models.CharField(max_length=100)
@@ -32,3 +38,23 @@ class Department(models.Model):
     name =  models.CharField(max_length=30, unique=True)
     password =  models.CharField(max_length=30)
     created_by = models.ForeignKey(User, null=True,on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+class Shift(models.Model):
+    year = models.IntegerField()
+    month = models.IntegerField()
+    date = models.IntegerField()
+    part = models.IntegerField()
+    hope = models.CharField("希望", max_length=3, choices=SHIFT_HOPE, blank=True)
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
+    department = models.ForeignKey(Department, on_delete = models.CASCADE)
+
+class Management(models.Model):
+    year = models.IntegerField()
+    month = models.IntegerField()
+    date = models.IntegerField()
+    part = models.IntegerField("パート数", default=1, null=True)
+    need = models.IntegerField("必要人数", default=1, null=True)
+    department = models.ForeignKey(Department, on_delete = models.CASCADE)

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}management{% endblock %}
+
+
+
+{% block content %}
+<table class="table">
+  <thead class="thead-inverse">
+    <tr>
+      <th>日にち</th>
+      <th>パート数</th>
+      <th>必要人数</th>
+    </tr>
+  </thead>
+  <tbody>
+<form action="{% url 'group_management' group.pk %}" method="post">
+  {% for form in formset %}
+  <tr>
+    <td>
+    {{ form.date.value }}日
+    </td>
+    <td>
+    {{ form.part }}
+    </td>
+    <td>
+    {{ form.need }}
+    </td>
+
+    {% for field in form.hidden_fields %}
+      {{ field }}
+    {% endfor %}
+  </tr>
+  {% endfor %}
+  {% csrf_token %}
+  {{ formset.management_form }}
+  </tbody>
+  </table>
+  <button type="submit" class="btn btn-primary btn-block">シフト設定作成</button>
+</form>
+
+{% endblock %}
