@@ -27,7 +27,17 @@ class GroupCreateForm(forms.ModelForm):
         fields = ['name', 'password']
 
 class ShiftSubmitForm(forms.ModelForm):
-    pass
+    class Meta:
+        model = Shift
+        fields = ['hope','year','month','date','part']
+        widgets = {
+                'year': forms.HiddenInput(),
+                'month': forms.HiddenInput(),
+                'date': forms.HiddenInput(),
+                'part': forms.HiddenInput(),
+        }
+ShiftSubmitFormSet = forms.modelformset_factory(Shift,form=ShiftSubmitForm,extra=0)
+
 
 class ShiftManagementForm(forms.ModelForm):
     class Meta:

@@ -1,12 +1,13 @@
 from django.shortcuts import render,get_object_or_404,redirect
-from .models import Board, Topic, Post, Department, Management
+from .models import Board, Topic, Post, Department, Management, Shift
 from accounts.models import User
 from .forms import NewTopicForm,PostForm,GroupCreateForm
 from django.contrib.auth.decorators import login_required
 import datetime
 import calendar
-from .forms import ShiftManagementFormSet
-# Create your views here.
+from .forms import ShiftManagementFormSet, ShiftSubmitFormSet
+from django.contrib import messages
+
 def home(request):
     boards = Board.objects.all()
     groups = Department.objects.all()
@@ -44,37 +45,34 @@ def group_page(request,pk):
     else:
         return redirect('group_login')
 
+def shift_list_get(request,pk):
+    shift
+
 
 @login_required
 def shift_management(request,pk):
     group = get_object_or_404(Department, pk=pk)
     user = request.user
-    if group_login_check(user,group) == True:
-        year = datetime.datetime.now().year
-        month = datetime.datetime.now().month #現在の年と月を取得
-        _, lastday = calendar.monthrange(year,month) #その月の最後の日にちを取得
-        obj = Management.objects.filter(year=year,month=month,department=group)
-        if obj.exists(): #グループのシフトの設定がすでにあればパス
-            pass
-        else: #なければ1ヶ月分の設定を新しく作成
-            date = range(1, lastday+1)
-            for i in date:
-                Management.objects.create(year=year,month=month,date=i,department=group)
-        if request.method == 'POST':
-            formset = ShiftManagementFormSet(request.POST)
-            if formset.is_valid():
-                formset.save()
-                return render(request,'group_page.html',{'group':group})
-            else:
-                formset = ShiftManagementFormSet(queryset = obj)
-                params ={
-                    'group':group,
-                    'formset':formset,
-                    'year':year,
-                    'month':month,
-                    'lastday':lastday,
-                }
-                return render(request, 'group_management.html', params)
+    if group_login_check(user,group) == False:
+        messages.error(request, 'グループにログインしてください')
+        return redirect('group_login')
+    if group.created_by != user:
+        messages.error(request, '管理者権限がありません')
+        return render(request,'group_page.html',{'group':group})
+    year = datetime.datetime.now().year
+    month = datetime.datetime.now().month #現在の年と月を取得
+    _, lastday = calendar.monthrange(year,month) #その月の最後の日にちを取得
+    obj = Management.objects.filter(year=year,month=month,department=group)
+    if obj.exists() == False: #グループのシフトの設定がなければ1ヶ月分の設定を新しく作成
+        date = range(1, lastday+1)
+        for i in date:
+            Management.objects.create(year=year,month=month,date=i,department=group)
+
+    if request.method == 'POST':
+        formset = ShiftManagementFormSet(request.POST)
+        if formset.is_valid():
+            formset.save()
+            return render(request,'group_page.html',{'group':group})
         else:
             formset = ShiftManagementFormSet(queryset = obj)
             params ={
@@ -84,9 +82,17 @@ def shift_management(request,pk):
                 'month':month,
                 'lastday':lastday,
             }
-        return render(request, 'group_management.html', params)
+            return render(request, 'group_management.html', params)
     else:
-        return redirect('group_login')
+        formset = ShiftManagementFormSet(queryset = obj)
+        params ={
+            'group':group,
+            'formset':formset,
+            'year':year,
+            'month':month,
+            'lastday':lastday,
+        }
+    return render(request, 'group_management.html', params)
 
 
 @login_required
@@ -105,38 +111,66 @@ def group_login(request):
     else:
         form = GroupCreateForm()
     return render(request, 'group_login.html', {'form': form})
-'''
+
 @login_required
-def shift_submit(request):
+def shift_submit(request,pk):
+    group = get_object_or_404(Department, pk=pk)
+    user = request.user
+    if group_login_check(user,group) == False:
+        messages.error(request, 'グループにログインしてください')
+        return redirect('group_login')
 
     year = datetime.datetime.now().year
-    month = 9
-    #month = datetime.datetime.now().month
-    _, lastday = calendar.monthrange(year,month)
-    obj = Kanri.objects.filter(year=year,month=month)
-    if obj.exists():
-        pass
-    else:
+    month = datetime.datetime.now().month #現在の年と月を取得
+    _, lastday = calendar.monthrange(year,month) #その月の最後の日にちを取得
+    obj = Shift.objects.filter(year=year,month=month,department=group,user=user)
+    if Management.objects.\
+    filter(year=year,month=month,department=group).exists() == False:
+        messages.error(request, 'シフト設定を先に行なってください')
+        return render(request,'group_page.html',{'group':group})
+    if obj.exists() == False: #グループのシフトの設定がなければ1ヶ月分の設定を新しく作成
         date = range(1, lastday+1)
-        for i in date:
-            Kanri.objects.create(year=year,month=month,date=i)
-    formset = KanriFormSet(queryset = obj)
-    if (request.method == 'POST'):
-        formset = KanriFormSet(request.POST)
+        for i_date in date:
+            part_obj = Management.objects.get(year=year,month=month,department=group,date=i_date).part
+            part_num = range(1,part_obj+1)
+            for i_part in part_num:
+                Shift.objects.create(year=year,month=month,date=i_date,department=group,user=user,part=i_part)
+
+    if request.method == 'POST':
+        formset = ShiftSubmitFormSet(request.POST)
         if formset.is_valid():
             formset.save()
-            return redirect(to='/hello')
+            return render(request,'group_page.html',{'group':group})
+        else:
+            formset = ShiftSubmitFormSet(queryset = obj)
+            params ={
+                'group':group,
+                'formset':formset,
+                'year':year,
+                'month':month,
+                'lastday':lastday,
+            }
+            return render(request, 'shift_submit.html', params)
+    else:
+        formset = ShiftSubmitFormSet(queryset = obj)
+        params ={
+            'group':group,
+            'formset':formset,
+            'year':year,
+            'month':month,
+            'lastday':lastday,
+        }
+    return render(request, 'shift_submit.html', params)
 
-    params ={
-        'title':'Hello',
-        'formset':formset,
-        'year':year,
-        'month':month,
-        'lastday':lastday,
-    }
 
-    return render(request, 'hello/create.html', params)
-'''
+
+
+
+#ここからは使わない
+
+
+
+
 
 def board_topics(request,pk):
     board = get_object_or_404(Board, pk=pk)
