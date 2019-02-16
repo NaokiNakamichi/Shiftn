@@ -49,8 +49,13 @@ def group_page(request,pk):
     filter(year=year,month=month,department=group).exists() == False: #Managementモデルがまだ存在しなければシフト希望は表示しない
         return render(request,'group_page.html',{'group':group})
     shift_list = shift_list_create(user,group)
+<<<<<<< HEAD
     date_list = range(1,lastday+1)
     return render(request,'group_page.html',{'group':group, 'shift_list':shift_list, 'date_list'})
+=======
+    date_list = range(1,lastday+1) #１から月の最後の日までのリスト
+    return render(request,'group_page.html',{'group':group, 'shift_list':shift_list, 'date_list':date_list})
+>>>>>>> shift_show
 
 def shift_list_create(user,group): # シフトを表示させるためのリストを作成
     year = datetime.datetime.now().year
@@ -165,7 +170,14 @@ def shift_submit(request,pk):
         formset = ShiftSubmitFormSet(request.POST)
         if formset.is_valid():
             formset.save()
-            return render(request,'group_page.html',{'group':group})
+            shift_list = shift_list_create(user,group)
+            date_list = range(1,lastday+1)
+            params = {
+                'group':group,
+                'shift_list':shift_list,
+                'date_list':date_list
+            }
+            return render(request,'group_page.html',params)
         else:
             formset = ShiftSubmitFormSet(queryset = obj)
             params ={
