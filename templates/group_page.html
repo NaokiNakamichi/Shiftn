@@ -4,7 +4,30 @@
 
 {% block content %}
 <h1> {{group.name}} </h1>
-
+  {% for shift in shift_list %}
+  <div class="table-responsive">
+　　<table class="table table-condensed table-bordered">
+      <thead>
+           <tr>
+              <th>#</th>
+              {% for date in date_list %}
+                  <th>{{ date }}日</th>
+              {% endfor %}
+           </tr>
+       </thead>
+       <tbody>
+        {% for user in shift %}
+          <tr>
+              <th>{{ user.0 }}</th>
+                {% for hope in user.1 %}
+                  <td>{{ hope }}</td>
+                {% endfor %}
+          </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+</div>
+  {% endfor %}
 
 
 <a href="{% url 'group_management' group.pk %}" class="btn btn-primary ml-2">シフト設定</a>
