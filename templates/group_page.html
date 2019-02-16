@@ -5,7 +5,17 @@
 {% block content %}
 <h1> {{group.name}} </h1>
 
+{% for form in shift_list %}
+<thead>
+     <tr>
+         <th>#</th>
+         {% for date in date_list %}
+          <th>date</th>
+         {% endfor %}
 
+     </tr>
+</thead>
+{% endfor %}
 
 <a href="{% url 'group_management' group.pk %}" class="btn btn-primary ml-2">シフト設定</a>
 <a href="{% url 'shift_submit' group.pk %}" class="btn btn-primary ml-2">シフト提出</a>

@@ -44,12 +44,13 @@ def group_page(request,pk):
         return redirect('group_login')
     year = datetime.datetime.now().year
     month = datetime.datetime.now().month #現在の年と月を取得
+    _, lastday = calendar.monthrange(year,month) #その月の最後の日にちを取得
     if Management.objects.\
     filter(year=year,month=month,department=group).exists() == False: #Managementモデルがまだ存在しなければシフト希望は表示しない
         return render(request,'group_page.html',{'group':group})
     shift_list = shift_list_create(user,group)
-    print(shift_list_create(user,group))
-    return render(request,'group_page.html',{'group':group, 'shift':shift_list})
+    date_list = range(1,lastday+1)
+    return render(request,'group_page.html',{'group':group, 'shift_list':shift_list, 'date_list'})
 
 def shift_list_create(user,group): # シフトを表示させるためのリストを作成
     year = datetime.datetime.now().year
