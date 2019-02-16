@@ -4,16 +4,6 @@
 
 {% block content %}
 <h1> {{group.name}} </h1>
-<<<<<<< HEAD
-
-{% for form in shift_list %}
-<thead>
-     <tr>
-         <th>#</th>
-         {% for date in date_list %}
-          <th>date</th>
-         {% endfor %}
-=======
   {% for shift in shift_list %}
   <div class="table-responsive">
 　　<table class="table table-condensed table-bordered">
@@ -38,7 +28,6 @@
   </table>
 </div>
   {% endfor %}
->>>>>>> shift_show
 
      </tr>
 </thead>
