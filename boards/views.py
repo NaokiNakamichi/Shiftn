@@ -14,7 +14,7 @@ def home(request):
     return render(request, 'home.html',{'boards':boards,'groups':groups})
 
 @login_required
-def group_create(request):
+def group_create(request): #グループの作成（ユーザーとの関連も作っておく）
     user = request.user
     if request.method == 'POST':
         form = GroupCreateForm(request.POST)
@@ -40,13 +40,37 @@ def group_login_check(user,group):
 def group_page(request,pk):
     group = get_object_or_404(Department, pk=pk)
     user = request.user
-    if group_login_check(user,group) == True:
-        return render(request,'group_page.html',{'group':group})
-    else:
+    if group_login_check(user,group) == False: #グループにログインしていなければログイン画面へ
         return redirect('group_login')
+    year = datetime.datetime.now().year
+    month = datetime.datetime.now().month #現在の年と月を取得
+    if Management.objects.\
+    filter(year=year,month=month,department=group).exists() == False: #Managementモデルがまだ存在しなければシフト希望は表示しない
+        return render(request,'group_page.html',{'group':group})
+    shift_list = shift_list_create(user,group)
+    print(shift_list_create(user,group))
+    return render(request,'group_page.html',{'group':group, 'shift':shift_list})
 
-def shift_list_get(request,pk):
-    shift
+def shift_list_create(user,group): # シフトを表示させるためのリストを作成
+    year = datetime.datetime.now().year
+    month = datetime.datetime.now().month #現在の年と月を取得
+    max_part = max(Management.objects.filter(year=year,month=month,department=group).\
+    values_list('part',flat=True))
+    part_list = range(1,max_part+1) #max_partで月のパート数の最大を取得、max_listで１から最大パート数のリストを作成
+    user_list = User.objects.filter(belongs=group).values_list('id',flat=True) #グループに所属するユーザーのリストを作成
+    shift_list = [] #表示させたいシフトのリストをセクション、ユーザー名、シフトの希望の順の深さで配列にする
+    for i_part_list in part_list:
+        kari_list = []
+        kari_list.append(i_part_list) #セクション名を追加
+        for count,i_user_list in enumerate(user_list):
+            kari_list.append([User.objects.get(id=i_user_list).username]) #ユーザー名を追加
+            kari_user = User.objects.get(id=i_user_list) #for文中におけるユーザーのオブジェクトを取得
+            kari_list[count+1].append(list(Shift.objects.\
+            filter(year=year,month=month,department=group,user=kari_user,part=i_part_list).\
+            order_by('date').values_list('hope',flat=True))) # シフトを追加
+        shift_list.append(kari_list)
+    return shift_list
+
 
 
 @login_required
