@@ -7,6 +7,9 @@ import datetime
 import calendar
 from .forms import ShiftManagementFormSet, ShiftSubmitFormSet
 from django.contrib import messages
+import numpy as np, pandas as pd
+from pulp import *
+from ortoolpy import addvars, addbinvars
 
 def home(request):
     boards = Board.objects.all()
@@ -195,6 +198,56 @@ def shift_submit(request,pk):
     return render(request, 'shift_submit.html', params)
 
 
+def shift_create(request,pk):
+    group = get_object_or_404(Department, pk=pk)
+    user = request.user
+    year = datetime.datetime.now().year
+    month = datetime.datetime.now().month #現在の年と月を取得
+    _, lastday = calendar.monthrange(year,month) #その月の最後の日にちを取得
+    if group_login_check(user,group) == False:
+        messages.error(request, 'グループにログインしてください')
+        return redirect('group_login')
+
+    shift_list = shift_list_create(user,group)
+    date_list = range(0,lastday)
+    kari,index,m = [],[],[]
+    #パートが一つの場合のみなので後で修正
+    for count ,_ in enumerate(shift_list[0]):
+        m.append(count)
+    m.pop(0)
+    for i_m in m:
+        kari.append(shift_list[0][i_m][1])
+        index.append(shift_list[0][i_m][0])
+    s = pd.DataFrame(kari,index=index,columns=date_list).T
+    man = Management.objects.filter(year=year,month=month,department=group,part=1).\
+    values_list('need',flat=True)
+    s['need'] = man
+    k = LpProblem()
+    N日, N従業員 = s.shape[0], s.shape[1]-1
+    V割当 = np.array(addbinvars(N日, N従業員))
+    L従業員 = list(range(N従業員))
+    L日 = list(range(N日))
+    s['V必要人数差'] = addvars(N日)
+    C希望不可 = 100
+    C必要人数差 = 100
+    C勤務日数 = 3
+    z = addvars(2)
+    k += C必要人数差 * lpSum(s.V必要人数差)\
+    + C希望不可 * lpSum(s.apply(lambda r: lpDot(1-r[L従業員],V割当[r.name]),1)) \
+    + C勤務日数 * (z[1]-z[0])
+    for _,r in s.iterrows():
+        k += r.V必要人数差 >=  (lpSum(V割当[r.name]) - r.need)
+        k += r.V必要人数差 >= -(lpSum(V割当[r.name]) - r.need)
+    for i_nin in L従業員:
+        k += lpSum(V割当[:,i_nin]) >= z[0]
+        k += lpSum(V割当[:,i_nin]) <= z[1]
+    status = k.solve()
+    R結果 = np.vectorize(value)(V割当).astype(int)
+    s['結果'] = [''.join(i*j for i,j in zip(r,s.columns)) for r in R結果]
+    print('目的関数', value(k.objective))
+    print(s['結果'])
+    print(R結果)
+    return render(request, 'shift_create.html')
 
 
 

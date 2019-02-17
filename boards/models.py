@@ -8,8 +8,8 @@ GENDER_CHOICES = (
 )
 
 SHIFT_HOPE = (
-    (0, '入れる ○'),
-    (1, '入れない ✖︎'),
+    (1, '入れる ○'),
+    (0, '入れない ✖︎'),
 )
 #BoardとTopicとPostは後で削除
 class Board(models.Model):
