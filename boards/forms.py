@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import formset_factory
-from .models import Topic, Post, Department, Shift, Management
+from .models import Topic, Post, Department, Shift, Management,ShiftDetail,ManagementDetail
 
 class NewTopicForm(forms.ModelForm):
     message = forms.CharField(
@@ -49,3 +49,24 @@ class ShiftManagementForm(forms.ModelForm):
                 'date': forms.HiddenInput()
         }
 ShiftManagementFormSet = forms.modelformset_factory(Management,form=ShiftManagementForm,extra=0)
+
+class ShiftDetailForm(forms.ModelForm):
+    class Meta:
+        model = ShiftDetail
+        fields = ['degree','year','month','comment','department','user']
+        widgets = {
+                'year': forms.HiddenInput(),
+                'month': forms.HiddenInput(),
+                'department': forms.HiddenInput(),
+                'user': forms.HiddenInput(),
+        }
+
+class ManageDetailForm(forms.ModelForm):
+    class Meta:
+        model = ManagementDetail
+        fields = ['relation','min_women','max0','min0','max1','min1','max2','min2']
+        widgets = {
+                'relation': forms.HiddenInput(),
+                'year': forms.HiddenInput(),
+                'month': forms.HiddenInput(),
+        }

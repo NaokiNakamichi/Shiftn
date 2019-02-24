@@ -5,6 +5,7 @@
 
 
 {% block content %}
+<a href="{% url 'management_detail' group.pk %}" class="btn btn-primary ml-2">シフト設定詳細</a>
 <table class="table">
   <thead class="thead-inverse">
     <tr>
@@ -38,5 +39,7 @@
   </table>
   <button type="submit" class="btn btn-primary btn-block">シフト設定作成</button>
 </form>
+
+
 
 {% endblock %}

@@ -1,7 +1,7 @@
 from django.shortcuts import render,get_object_or_404,redirect
-from .models import Board, Topic, Post, Department, Management, Shift
+from .models import Board, Topic, Post, Department, Management, Shift,ShiftDetail,ManagementDetail
 from accounts.models import User
-from .forms import NewTopicForm,PostForm,GroupCreateForm
+from .forms import NewTopicForm,PostForm,GroupCreateForm,ShiftDetailForm,ManageDetailForm
 from django.contrib.auth.decorators import login_required
 import datetime
 import calendar
@@ -197,6 +197,48 @@ def shift_submit(request,pk):
         }
     return render(request, 'shift_submit.html', params)
 
+@login_required
+def shift_detail(request,pk):
+    group = get_object_or_404(Department, pk=pk)
+    user = request.user
+    if group_login_check(user,group) == False:
+        messages.error(request, 'グループにログインしてください')
+        return redirect('group_login')
+    year = datetime.datetime.now().year
+    month = datetime.datetime.now().month #現在の年と月を取得
+    _, lastday = calendar.monthrange(year,month) #その月の最後の日にちを取得
+    obj,created = ShiftDetail.objects.get_or_create(year=year,month=month,department=group,user=user)
+    if request.method == 'POST':
+        form = ShiftDetailForm(request.POST,instance=obj)
+        if form.is_valid():
+            form.save()
+            shift_list = shift_list_create(user,group)
+            date_list = range(1,lastday+1)
+            params = {
+                'group':group,
+                'shift_list':shift_list,
+                'date_list':date_list
+            }
+            return render(request,'group_page.html',params)
+        else:
+            form = ShiftDetailForm(instance=obj)
+            params ={
+                'group':group,
+                'user': user,
+                'form':form,
+                'year':year,
+                'month':month,
+            }
+            return render(request, 'shift_detail.html', params)
+    else:
+        form = ShiftDetailForm(instance=obj)
+        params ={
+            'group':group,
+            'form':form,
+            'year':year,
+            'month':month,
+        }
+    return render(request, 'shift_detail.html', params)
 
 def shift_create(request,pk):
     group = get_object_or_404(Department, pk=pk)
@@ -226,21 +268,30 @@ def shift_create(request,pk):
     N日, N従業員 = s.shape[0], s.shape[1]-1
     V割当 = np.array(addbinvars(N日, N従業員))
     L従業員 = list(range(N従業員))
+    L多め = list(ShiftDetail.objects.filter(year=year,month=month,department=group,degree=0).\
+    values_list('user',flat=True))
+    L普通 = list(ShiftDetail.objects.filter(year=year,month=month,department=group,degree=1).\
+    values_list('user',flat=True))
+    L少なめ = list(ShiftDetail.objects.filter(year=year,month=month,department=group,degree=2).\
+    values_list('user',flat=True))
+    print(L多め)
+    print(L普通)
+    print(L少なめ)
     L日 = list(range(N日))
     s['V必要人数差'] = addvars(N日)
     C希望不可 = 100
     C必要人数差 = 100
     C勤務日数 = 3
-    z = addvars(2)
+    #z = addvars(2)
     k += C必要人数差 * lpSum(s.V必要人数差)\
-    + C希望不可 * lpSum(s.apply(lambda r: lpDot(1-r[L従業員],V割当[r.name]),1)) \
-    + C勤務日数 * (z[1]-z[0])
+    + C希望不可 * lpSum(s.apply(lambda r: lpDot(1-r[L従業員],V割当[r.name]),1))
+    #+ C勤務日数 * (z[1]-z[0])
     for _,r in s.iterrows():
         k += r.V必要人数差 >=  (lpSum(V割当[r.name]) - r.need)
         k += r.V必要人数差 >= -(lpSum(V割当[r.name]) - r.need)
     for i_nin in L従業員:
-        k += lpSum(V割当[:,i_nin]) >= z[0]
-        k += lpSum(V割当[:,i_nin]) <= z[1]
+        k += lpSum(V割当[:,i_nin]) >= 5
+        k += lpSum(V割当[:,i_nin]) <= 7
     status = k.solve()
     R結果 = np.vectorize(value)(V割当).astype(int)
     s['結果'] = [''.join(i*j for i,j in zip(r,s.columns)) for r in R結果]
@@ -248,6 +299,53 @@ def shift_create(request,pk):
     print(s['結果'])
     print(R結果)
     return render(request, 'shift_create.html')
+
+def management_detail(request,pk):
+    group = get_object_or_404(Department, pk=pk)
+    user = request.user
+    if group_login_check(user,group) == False:
+        messages.error(request, 'グループにログインしてください')
+        return redirect('group_login')
+    if group.created_by != user:
+        messages.error(request, '管理者権限がありません')
+        return render(request,'group_page.html',{'group':group})
+    year = datetime.datetime.now().year
+    month = datetime.datetime.now().month #現在の年と月を取得
+    _, lastday = calendar.monthrange(year,month) #その月の最後の日にちを取得
+    obj,created = ManagementDetail.objects.get_or_create(relation=group,year=year,month=month)
+
+    if request.method == 'POST':
+        form = ManageDetailForm(request.POST,instance=obj)
+        if form.is_valid():
+            form.save()
+            shift_list = shift_list_create(user,group)
+            date_list = range(1,lastday+1)
+            params = {
+                'group':group,
+                'shift_list':shift_list,
+                'date_list':date_list
+            }
+            return render(request,'group_page.html',params)
+        else:
+            form = ManageDetailForm(instance=obj)
+            params ={
+                'group':group,
+                'form':form,
+                'year':year,
+                'month':month,
+            }
+            return render(request, 'management_detail.html', params)
+    else:
+        form = ManageDetailForm(instance=obj)
+        params ={
+            'group':group,
+            'form':form,
+            'year':year,
+            'month':month,
+        }
+    return render(request, 'management_detail.html', params)
+
+
 
 
 

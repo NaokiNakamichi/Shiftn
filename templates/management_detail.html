@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}management{% endblock %}
+
+
+
+{% block content %}
+  <form action="{% url 'management_detail' group.pk %}" method="post">
+
+      {% csrf_token %}
+      <div class="form-group">
+        <label>{{ form.max0.label_tag }}</label>
+        {{ form.max0 }}
+      </div>
+      <div class="form-group">
+        <label>{{ form.min0.label_tag }}</label>
+        {{ form.min0 }}
+      </div>
+      <div class="form-group">
+        <label>{{ form.max1.label_tag }}</label>
+        {{ form.max1 }}
+      </div>
+      <div class="form-group">
+        <label>{{ form.min1.label_tag }}</label>
+        {{ form.min1 }}
+      </div>
+      <div class="form-group">
+        <label>{{ form.max2.label_tag }}</label>
+        {{ form.max2 }}
+      </div>
+      <div class="form-group">
+        <label>{{ form.min2.label_tag }}</label>
+        {{ form.min2 }}
+      </div>
+      <div class="form-group">
+        <label>{{ form.min_women.label_tag }}</label>
+        {{ form.min_women }}
+      </div>
+      {% for field in form.hidden_fields %}
+        {{ field }}
+      {% endfor %}
+    <button type="submit" class="btn btn-success">提出</button>
+  </form>
+{% endblock %}

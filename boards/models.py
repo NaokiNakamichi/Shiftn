@@ -3,13 +3,19 @@ from accounts.models import User
 from django.conf import settings
 
 GENDER_CHOICES = (
-    ('1', '女性'),
-    ('2', '男性'),
+    (1, '女性'),
+    (0, '男性'),
 )
 
 SHIFT_HOPE = (
     (1, '入れる ○'),
     (0, '入れない ✖︎'),
+)
+
+SHIFT_DEGREE = (
+    (0, 'たくさん入れる'),
+    (1, '普通'),
+    (2, '少なめで'),
 )
 #BoardとTopicとPostは後で削除
 class Board(models.Model):
@@ -65,3 +71,23 @@ class Management(models.Model): # グループにおけるシフトの設定のM
     def __str__(self):
         return self.department.name +  \
          str(self.month) + "月" + str(self.date) + "日"
+
+class ShiftDetail(models.Model):
+    year = models.IntegerField()
+    month = models.IntegerField()
+    comment = models.CharField("コメント",max_length=255,null=True,blank=True)
+    degree = models.IntegerField("シフト量の希望",default=1, choices=SHIFT_DEGREE,null=True)
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
+    department = models.ForeignKey(Department, on_delete = models.CASCADE)
+
+class ManagementDetail(models.Model):
+    year = models.IntegerField(null=True,blank=True)
+    month = models.IntegerField(null=True,blank=True)
+    relation = models.ForeignKey(Department, on_delete = models.CASCADE)
+    min_women = models.IntegerField("女性の最低人数",null=True,blank=True)
+    max0 = models.IntegerField("多めに入れる人の最大シフト数",null=True,blank=True)
+    min0 = models.IntegerField("多めに入れる人の最小シフト数",null=True,blank=True)
+    max1 = models.IntegerField("標準の人の最大シフト数",null=True,blank=True)
+    min1 = models.IntegerField("標準の人の最小シフト数",null=True,blank=True)
+    max2 = models.IntegerField("少なめの人の最大シフト数",null=True,blank=True)
+    min2 = models.IntegerField("少なめの人の最小シフト数",null=True,blank=True)

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}management{% endblock %}
+
+
+
+{% block content %}
+  <form action="{% url 'shift_detail' group.pk %}" method="post">
+
+      {% csrf_token %}
+      <div class="form-group">
+        <label>{{ form.degree.label_tag }}</label>
+        {{ form.degree }}
+      </div>
+      <div class="form-group">
+        <label>{{ form.comment.label_tag }}</label>
+        {{ form.comment }}
+      </div>
+      {% for field in form.hidden_fields %}
+        {{ field }}
+      {% endfor %}
+    <button type="submit" class="btn btn-success">提出</button>
+  </form>
+{% endblock %}
