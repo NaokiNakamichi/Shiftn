@@ -252,52 +252,77 @@ def shift_create(request,pk):
 
     shift_list = shift_list_create(user,group)
     date_list = range(0,lastday)
-    kari,index,m = [],[],[]
+    kari,user_list,m = [],[],[]
     #パートが一つの場合のみなので後で修正
     for count ,_ in enumerate(shift_list[0]):
         m.append(count)
     m.pop(0)
     for i_m in m:
         kari.append(shift_list[0][i_m][1])
-        index.append(shift_list[0][i_m][0])
-    s = pd.DataFrame(kari,index=index,columns=date_list).T
+        user_list.append(shift_list[0][i_m][0])
+    s = pd.DataFrame(kari,index=user_list,columns=date_list).T
     man = Management.objects.filter(year=year,month=month,department=group,part=1).\
     values_list('need',flat=True)
     s['need'] = man
     k = LpProblem()
     N日, N従業員 = s.shape[0], s.shape[1]-1
-    V割当 = np.array(addbinvars(N日, N従業員))
-    L従業員 = list(range(N従業員))
+    L日,L従業員 = list(range(N日)),list(range(N従業員))
+    V割当 = pd.DataFrame(np.array(addbinvars(N日, N従業員)),columns=user_list,index=date_list)
     L多め = list(ShiftDetail.objects.filter(year=year,month=month,department=group,degree=0).\
     values_list('user',flat=True))
     L普通 = list(ShiftDetail.objects.filter(year=year,month=month,department=group,degree=1).\
     values_list('user',flat=True))
     L少なめ = list(ShiftDetail.objects.filter(year=year,month=month,department=group,degree=2).\
     values_list('user',flat=True))
-    print(L多め)
-    print(L普通)
-    print(L少なめ)
-    L日 = list(range(N日))
-    s['V必要人数差'] = addvars(N日)
-    C希望不可 = 100
+    L_big,L_nor,L_sma = [],[],[]
+    for i_1 in L多め:
+        L_big.append(User.objects.get(id=i_1).username)
+    for i_1 in L普通:
+        L_nor.append(User.objects.get(id=i_1).username)
+    for i_1 in L少なめ:
+        L_sma.append(User.objects.get(id=i_1).username)
+    man_det = ManagementDetail.objects.get(year=year,month=month,relation=group)
+
+    user_man = []
+
+
+    C希望不可 = 101
     C必要人数差 = 100
     C勤務日数 = 3
+    C3連勤 = 5
+    C4連勤 = 20
     #z = addvars(2)
-    k += C必要人数差 * lpSum(s.V必要人数差)\
-    + C希望不可 * lpSum(s.apply(lambda r: lpDot(1-r[L従業員],V割当[r.name]),1))
+    kk = 0
+    s_rev = s[user_list].apply(lambda r: 1-r[user_list],1)
+    for (_,r),(_,d) in zip(s_rev.iterrows(),V割当.iterrows()):
+        kk += C希望不可 * lpDot(r,d)
+    s['V必要人数差'] = addvars(N日)
+    k += C必要人数差 * lpSum(s.V必要人数差) + kk
     #+ C勤務日数 * (z[1]-z[0])
-    for _,r in s.iterrows():
-        k += r.V必要人数差 >=  (lpSum(V割当[r.name]) - r.need)
-        k += r.V必要人数差 >= -(lpSum(V割当[r.name]) - r.need)
-    for i_nin in L従業員:
-        k += lpSum(V割当[:,i_nin]) >= 5
-        k += lpSum(V割当[:,i_nin]) <= 7
-    status = k.solve()
+    for _,r in V割当[L_big].iteritems():
+        k += lpSum(r) >= man_det.min0
+        k += lpSum(r) <= man_det.max0
+    for _,r in V割当[L_nor].iteritems():
+        k += lpSum(r) >= man_det.min1
+        k += lpSum(r) <= man_det.max1
+    for _,r in V割当[L_sma].iteritems():
+        k += lpSum(r) >= man_det.min2
+        k += lpSum(r) <= man_det.max2
+
+    for (_,r),(_,d) in zip(s.iterrows(),V割当.iterrows()):
+        k += r.V必要人数差 >=  (lpSum(d) - r.need)
+        k += r.V必要人数差 >= -(lpSum(d) - r.need)
+    for i in L従業員:
+        for i in (V割当.values[:-2,i] + V割当.values[1:-1,i] + V割当.values[2:,i]).flat:
+            print(i)
+            k += i <= 2
+    k.solve()
     R結果 = np.vectorize(value)(V割当).astype(int)
     s['結果'] = [''.join(i*j for i,j in zip(r,s.columns)) for r in R結果]
+    print(s)
     print('目的関数', value(k.objective))
-    print(s['結果'])
-    print(R結果)
+    print(np.sum(R結果, axis=0))
+
     return render(request, 'shift_create.html')
 
 def management_detail(request,pk):
