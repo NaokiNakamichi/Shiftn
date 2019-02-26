@@ -10,6 +10,8 @@ from django.contrib import messages
 import numpy as np, pandas as pd
 from pulp import *
 from ortoolpy import addvars, addbinvars
+import jpholiday
+w_list = ['月', '火', '水', '木', '金', '土', '日']
 
 def home(request):
     boards = Board.objects.all()
@@ -53,7 +55,18 @@ def group_page(request,pk):
         return render(request,'group_page.html',{'group':group})
     shift_list = shift_list_create(user,group)
     date_list = range(1,lastday+1) #１から月の最後の日までのリスト
-    return render(request,'group_page.html',{'group':group, 'shift_list':shift_list, 'date_list':date_list})
+    weekday_list = []
+    for week_day in date_list:
+        w = datetime.datetime(year, month, week_day)
+        weekday_list.append((week_day,w_list[datetime.datetime.weekday(w)],\
+        jpholiday.is_holiday(datetime.date(year, month, week_day))))
+    params ={
+            'group':group,
+            'shift_list':shift_list,
+            'weekday_list':weekday_list,
+            }
+    print(weekday_list)
+    return render(request,'group_page.html',params)
 
 def shift_list_create(user,group): # シフトを表示させるためのリストを作成
     year = datetime.datetime.now().year
@@ -282,23 +295,31 @@ def shift_create(request,pk):
     for i_1 in L少なめ:
         L_sma.append(User.objects.get(id=i_1).username)
     man_det = ManagementDetail.objects.get(year=year,month=month,relation=group)
+    woman_list,veteran_list =[],[]
+    for person in user_list:
+        if User.objects.get(username=person).gendar == 1:
+            woman_list.append(person)
 
-    user_man = []
+    for veteran in user_list:
+        if User.objects.get(username=veteran).experience == 1:
+            veteran_list.append(veteran)
+        if User.objects.get(username=veteran).experience == 2:
+            veteran_list.append(veteran)
 
+    print(veteran_list)
 
     C希望不可 = 101
     C必要人数差 = 100
     C勤務日数 = 3
     C3連勤 = 5
     C4連勤 = 20
-    #z = addvars(2)
-    kk = 0
     s_rev = s[user_list].apply(lambda r: 1-r[user_list],1)
     for (_,r),(_,d) in zip(s_rev.iterrows(),V割当.iterrows()):
-        kk += C希望不可 * lpDot(r,d)
+        k += lpDot(r,d) <= 0
     s['V必要人数差'] = addvars(N日)
-    k += C必要人数差 * lpSum(s.V必要人数差) + kk
-    #+ C勤務日数 * (z[1]-z[0])
+    s['V男女比'] = addvars(N日)
+    s['V経験'] = addvars(N日)
+    k += C必要人数差 * lpSum(s.V必要人数差) + lpSum(s.V男女比) + lpSum(s.V経験)
     for _,r in V割当[L_big].iteritems():
         k += lpSum(r) >= man_det.min0
         k += lpSum(r) <= man_det.max0
@@ -308,20 +329,36 @@ def shift_create(request,pk):
     for _,r in V割当[L_sma].iteritems():
         k += lpSum(r) >= man_det.min2
         k += lpSum(r) <= man_det.max2
-
     for (_,r),(_,d) in zip(s.iterrows(),V割当.iterrows()):
         k += r.V必要人数差 >=  (lpSum(d) - r.need)
         k += r.V必要人数差 >= -(lpSum(d) - r.need)
+
+    for (_,r),(_,d) in zip(s.iterrows(),V割当[woman_list].iterrows()):
+        k += (r.V男女比 + lpSum(d)) >= man_det.min_women
+    for (_,r),(_,d) in zip(s.iterrows(),V割当[veteran_list].iterrows()):
+        k += (r.V経験 + lpSum(d)) >= man_det.min_veteran
+    '''
     for i in L従業員:
-        for i in (V割当.values[:-2,i] + V割当.values[1:-1,i] + V割当.values[2:,i]).flat:
-            print(i)
-            k += i <= 2
+        for i in (V割当.values[:-3,i] + V割当.values[1:-2,i] + V割当.values[2:-1,i] + V割当.values[3:,i]).flat:
+            k +=  np.clip(i,0,1)
+
+
+
+    for woman in V割当[woman_list].iterrows():
+        k += lpSum(woman[1:]) >= man_det.min_women
+    for veteran in V割当[veteran_list].iterrows():
+        k += lpSum(veteran[1:]) >= man_det.min_veteran
+    '''
+
     k.solve()
     R結果 = np.vectorize(value)(V割当).astype(int)
     s['結果'] = [''.join(i*j for i,j in zip(r,s.columns)) for r in R結果]
-    print(s)
+
     print('目的関数', value(k.objective))
+    print(R結果)
+    print(s.結果)
     print(np.sum(R結果, axis=0))
+    print(np.vectorize(value)(s.V男女比).astype(int))
 
     return render(request, 'shift_create.html')
 

@@ -13,11 +13,11 @@ admin.site.register(ShiftDetail)
 class AdminUserAdmin(UserAdmin):
 
     fieldsets = (
-        (None, {'fields': ('username','email', 'gendar', 'password')}),
+        (None, {'fields': ('username','email', 'gendar', 'password','experience','register_day')}),
         (('Personal info'), {'fields': ('first_name', 'last_name')}),
         (('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser',
                                        'groups', 'user_permissions')}),
         (('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
-    list_display = ('username', 'email', 'is_staff', 'gendar')
+    list_display = ('username', 'email', 'is_staff', 'gendar','experience')
     search_fields = ('username', 'email')

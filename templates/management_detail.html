@@ -36,6 +36,10 @@
         <label>{{ form.min_women.label_tag }}</label>
         {{ form.min_women }}
       </div>
+      <div class="form-group">
+        <label>{{ form.min_veteran.label_tag }}</label>
+        {{ form.min_veteran }}
+      </div>
       {% for field in form.hidden_fields %}
         {{ field }}
       {% endfor %}

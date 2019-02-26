@@ -17,6 +17,11 @@ SHIFT_DEGREE = (
     (1, '普通'),
     (2, '少なめで'),
 )
+EXPERIENCE_CHOICE = (
+    (0, '入ったばかり'),
+    (1, '入って半年はたった'),
+    (2, '入って１年以上はたった')
+)
 #BoardとTopicとPostは後で削除
 class Board(models.Model):
     name = models.CharField(max_length=30, unique=True)
@@ -71,6 +76,8 @@ class Management(models.Model): # グループにおけるシフトの設定のM
     def __str__(self):
         return self.department.name +  \
          str(self.month) + "月" + str(self.date) + "日"
+         
+
 
 class ShiftDetail(models.Model):
     year = models.IntegerField()
@@ -85,9 +92,14 @@ class ManagementDetail(models.Model):
     month = models.IntegerField(null=True,blank=True)
     relation = models.ForeignKey(Department, on_delete = models.CASCADE)
     min_women = models.IntegerField("女性の最低人数",null=True,blank=True)
+    min_veteran = models.IntegerField("経験者の最低人数",null=True,blank=True)
     max0 = models.IntegerField("多めに入れる人の最大シフト数",null=True,blank=True)
     min0 = models.IntegerField("多めに入れる人の最小シフト数",null=True,blank=True)
     max1 = models.IntegerField("標準の人の最大シフト数",null=True,blank=True)
     min1 = models.IntegerField("標準の人の最小シフト数",null=True,blank=True)
     max2 = models.IntegerField("少なめの人の最大シフト数",null=True,blank=True)
     min2 = models.IntegerField("少なめの人の最小シフト数",null=True,blank=True)
+
+class Profile(models.Model):
+    experience = models.IntegerField("経験年数",choices=EXPERIENCE_CHOICE)
+    user = models.OneToOneField(User,related_name="profile" ,on_delete = models.CASCADE)

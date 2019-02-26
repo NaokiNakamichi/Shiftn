@@ -64,7 +64,7 @@ class ShiftDetailForm(forms.ModelForm):
 class ManageDetailForm(forms.ModelForm):
     class Meta:
         model = ManagementDetail
-        fields = ['relation','min_women','max0','min0','max1','min1','max2','min2']
+        fields = ['relation','min_women','max0','min0','max1','min1','max2','min2','min_veteran']
         widgets = {
                 'relation': forms.HiddenInput(),
                 'year': forms.HiddenInput(),

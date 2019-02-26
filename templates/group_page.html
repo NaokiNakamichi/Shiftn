@@ -9,9 +9,13 @@
 　　<table class="table table-condensed table-bordered">
       <thead>
            <tr>
-              <th>#</th>
-              {% for date in date_list %}
-                  <th>{{ date }}日</th>
+              <th>############</th>
+              {% for date in weekday_list %}
+                  {% if date.2  %}
+                    <th><span class="text-danger">{{ date.0 }}日({{ date.1 }})</span></th>
+                  {% else %}
+                    <th>{{ date.0 }}日({{ date.1 }})</th>
+                  {% endif %}
               {% endfor %}
            </tr>
        </thead>
@@ -20,7 +24,11 @@
           <tr>
               <th>{{ user.0 }}</th>
                 {% for hope in user.1 %}
-                  <td>{{ hope }}</td>
+                  {% if hope == 1 %}
+                    <td>○</td>
+                  {% else %}
+                    <td>✖️</td>
+                  {% endif %}
                 {% endfor %}
           </tr>
         {% endfor %}
