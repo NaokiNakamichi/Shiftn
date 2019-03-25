@@ -1,6 +1,6 @@
 from django.contrib import admin
 from accounts.models import User
-from .models import Board,Department,Management,Shift,ShiftDetail,ManagementDetail
+from .models import Board,Department,Management,Shift,ShiftDetail,ManagementDetail,ManagementNeed
 from django.contrib.auth.admin import UserAdmin
 
 admin.site.register(Board)
@@ -8,7 +8,9 @@ admin.site.register(Management)
 admin.site.register(Department)
 admin.site.register(Shift)
 admin.site.register(ManagementDetail)
+admin.site.register(ManagementNeed)
 admin.site.register(ShiftDetail)
+
 @admin.register(User)
 class AdminUserAdmin(UserAdmin):
 

@@ -1,1 +1,76 @@
 {% extends 'base.html' %}
+
+{% block content %}
+<table class="table">
+  <thead class="thead-inverse">
+    <tr>
+      <th>=日にち=</th>
+      <th>入る人</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for show_i in show %}
+      <tr>
+        <td>
+          {% if show_i.0.2  %}
+            <span class="text-danger">{{ show_i.0.0 }}日({{ show_i.0.1 }})</span>
+          {% else %}
+            {{ show_i.0.0 }}日({{ show_i.0.1 }})
+          {% endif %}
+        </td>
+        <td>
+        {% for k in show_i.1 %}
+        {{ k }}
+        {% endfor %}
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+  </table>
+
+<div class="table-responsive">
+　　<table class="table table-condensed table-bordered">
+      <thead>
+        <tr>
+          <th>########</th>
+          {% for count_name in count.0 %}
+                <th>{{ count_name }}</th>
+          {% endfor %}
+        </tr>
+       </thead>
+       <tbody>
+          <tr>
+              <th>回数希望</th>
+              {% for count_i in count.1 %}
+                    <td>{{ count_i }}</td>
+
+              {% endfor %}
+          </tr>
+          <tr>
+              <th>回数</th>
+              {% for count_i in count.2 %}
+                    <td>{{ count_i }}</td>
+
+              {% endfor %}
+          </tr>
+          <tr>
+              <th>土日祝回数</th>
+              {% for count_i in count.3 %}
+                    <td>{{ count_i }}</td>
+
+              {% endfor %}
+          </tr>
+
+          <tr>
+              <th>3連勤</th>
+              {% for count_i in count.4 %}
+                    <td>{{ count_i }}</td>
+
+              {% endfor %}
+          </tr>
+
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

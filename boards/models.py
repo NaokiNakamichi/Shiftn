@@ -65,19 +65,28 @@ class Shift(models.Model): #シフトのModel。グループにおけるユー�
         return self.department.name + " " + self.user.username + \
          str(self.month) + "月" + str(self.date) + "日" + "part" + str(self.part)
 
-class Management(models.Model): # グループにおけるシフトの設定のModel。何月何日に何人必要なのかを残すためのInt
+class Management(models.Model): # グループにおけるシフトの設定のModel。何月何日に何part必要なのかを残すためのInt
     year = models.IntegerField()
     month = models.IntegerField()
     date = models.IntegerField()
     part = models.IntegerField("パート数", default=1, null=True)
-    need = models.IntegerField("必要人数", default=1, null=True)
     department = models.ForeignKey(Department, on_delete = models.CASCADE)
 
     def __str__(self):
         return self.department.name +  \
          str(self.month) + "月" + str(self.date) + "日"
-         
 
+class ManagementNeed(models.Model):#人数設定
+    year = models.IntegerField(null=True,blank=True)
+    month = models.IntegerField(null=True,blank=True)
+    date = models.IntegerField(null=True,blank=True)
+    need = models.IntegerField("必要人数", default=1, null=True)
+    part = models.IntegerField("セクション",null=True,blank=True)
+    department = models.ForeignKey(Department, on_delete = models.CASCADE)
+
+    def __str__(self):
+        return self.department.name +  \
+         str(self.month) + "月" + str(self.date) + "日" + str(self.part)
 
 class ShiftDetail(models.Model):
     year = models.IntegerField()
@@ -86,19 +95,23 @@ class ShiftDetail(models.Model):
     degree = models.IntegerField("シフト量の希望",default=1, choices=SHIFT_DEGREE,null=True)
     user = models.ForeignKey(User, on_delete = models.CASCADE)
     department = models.ForeignKey(Department, on_delete = models.CASCADE)
+    def __str__(self):
+        return self.department.name +  \
+         str(self.month) + "月" + self.user.username
 
 class ManagementDetail(models.Model):
     year = models.IntegerField(null=True,blank=True)
     month = models.IntegerField(null=True,blank=True)
     relation = models.ForeignKey(Department, on_delete = models.CASCADE)
-    min_women = models.IntegerField("女性の最低人数",null=True,blank=True)
-    min_veteran = models.IntegerField("経験者の最低人数",null=True,blank=True)
-    max0 = models.IntegerField("多めに入れる人の最大シフト数",null=True,blank=True)
-    min0 = models.IntegerField("多めに入れる人の最小シフト数",null=True,blank=True)
-    max1 = models.IntegerField("標準の人の最大シフト数",null=True,blank=True)
-    min1 = models.IntegerField("標準の人の最小シフト数",null=True,blank=True)
-    max2 = models.IntegerField("少なめの人の最大シフト数",null=True,blank=True)
-    min2 = models.IntegerField("少なめの人の最小シフト数",null=True,blank=True)
+    min_women = models.IntegerField("女性の最低人数",null=True,blank=True,default=1)
+    min_veteran = models.IntegerField("経験者の最低人数",null=True,blank=True,default=1)
+    max0 = models.IntegerField("多めに入れる人の最大シフト数",null=True,blank=True,default=11)
+    min0 = models.IntegerField("多めに入れる人の最小シフト数",null=True,blank=True,default=1)
+    max1 = models.IntegerField("標準の人の最大シフト数",null=True,blank=True,default=9)
+    min1 = models.IntegerField("標準の人の最小シフト数",null=True,blank=True,default=1)
+    max2 = models.IntegerField("少なめの人の最大シフト数",null=True,blank=True,default=4)
+    min2 = models.IntegerField("少なめの人の最小シフト数",null=True,blank=True,default=0)
+    renkin_max = models.IntegerField("連勤の最大シフト数",null=True,blank=True,default=3)
 
 class Profile(models.Model):
     experience = models.IntegerField("経験年数",choices=EXPERIENCE_CHOICE)

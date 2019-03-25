@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import formset_factory
-from .models import Topic, Post, Department, Shift, Management,ShiftDetail,ManagementDetail
+from .models import Topic, Post, Department, Shift, Management,ShiftDetail,ManagementDetail,ManagementNeed
 
 class NewTopicForm(forms.ModelForm):
     message = forms.CharField(
@@ -42,13 +42,25 @@ ShiftSubmitFormSet = forms.modelformset_factory(Shift,form=ShiftSubmitForm,extra
 class ShiftManagementForm(forms.ModelForm):
     class Meta:
         model = Management
-        fields = ['need','year','month','date','part']
+        fields = ['year','month','date','part']
         widgets = {
                 'year': forms.HiddenInput(),
                 'month': forms.HiddenInput(),
                 'date': forms.HiddenInput()
         }
 ShiftManagementFormSet = forms.modelformset_factory(Management,form=ShiftManagementForm,extra=0)
+
+class ManagementNeedForm(forms.ModelForm):
+    class Meta:
+        model = ManagementNeed
+        fields = ['year','month','date','need','part']
+        widgets = {
+            'year': forms.HiddenInput(),
+            'month': forms.HiddenInput(),
+            'date': forms.HiddenInput(),
+            'part': forms.HiddenInput(),
+        }
+ManagementNeedFormSet = forms.modelformset_factory(ManagementNeed,form=ManagementNeedForm,extra=0)
 
 class ShiftDetailForm(forms.ModelForm):
     class Meta:
@@ -64,7 +76,7 @@ class ShiftDetailForm(forms.ModelForm):
 class ManageDetailForm(forms.ModelForm):
     class Meta:
         model = ManagementDetail
-        fields = ['relation','min_women','max0','min0','max1','min1','max2','min2','min_veteran']
+        fields = ['relation','min_women','max0','min0','max1','min1','max2','min2','min_veteran','renkin_max']
         widgets = {
                 'relation': forms.HiddenInput(),
                 'year': forms.HiddenInput(),

@@ -5,40 +5,29 @@
 
 
 {% block content %}
-<a href="{% url 'management_detail' group.pk %}" class="btn btn-primary ml-2">シフト設定詳細</a>
-<table class="table">
-  <thead class="thead-inverse">
-    <tr>
-      <th>日にち</th>
-      <th>パート数</th>
-      <th>必要人数</th>
-    </tr>
-  </thead>
-  <tbody>
-<form action="{% url 'group_management' group.pk %}" method="post">
-  {% for form in formset %}
-  <tr>
-    <td>
-    {{ form.date.value }}日
-    </td>
-    <td>
-    {{ form.part }}
-    </td>
-    <td>
-    {{ form.need }}
-    </td>
 
-    {% for field in form.hidden_fields %}
-      {{ field }}
-    {% endfor %}
-  </tr>
-  {% endfor %}
-  {% csrf_token %}
-  {{ formset.management_form }}
-  </tbody>
-  </table>
-  <button type="submit" class="btn btn-primary btn-block">シフト設定作成</button>
-</form>
+
+<div class="card border-info mb-3">
+  <div class="card-body">
+    <h4 class="card-title"><a href="{% url 'management_part' group.pk %}" >パート設定</a></h4>
+    <p class="card-text">1番目に設定する項目。ランチの有無</p>
+</div>
+</div>
+<div class="card border-info mb-3">
+  <div class="card-body">
+    <h4 class="card-title"><a href="{% url 'management_need' group.pk %}" >シフト必要人数設定</a></h4>
+    <p class="card-text">２番目に設定する項目。必要人数</p>
+</div>
+</div>
+
+<div class="card border-info mb-3">
+  <div class="card-body">
+    <h4 class="card-title"><a href="{% url 'management_detail' group.pk %}" >シフト設定詳細</a></h4>
+    <p class="card-text">最後に設定する項目。シフト作成においての詳細</p>
+</div>
+</div>
+
+
 
 
 

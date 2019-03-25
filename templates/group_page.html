@@ -3,44 +3,42 @@
 {% block title %}Sign up to Django Boards{% endblock %}
 
 {% block content %}
-<h1> {{group.name}} </h1>
-  {% for shift in shift_list %}
-  <div class="table-responsive">
-　　<table class="table table-condensed table-bordered">
-      <thead>
-           <tr>
-              <th>############</th>
-              {% for date in weekday_list %}
-                  {% if date.2  %}
-                    <th><span class="text-danger">{{ date.0 }}日({{ date.1 }})</span></th>
-                  {% else %}
-                    <th>{{ date.0 }}日({{ date.1 }})</th>
-                  {% endif %}
-              {% endfor %}
-           </tr>
-       </thead>
-       <tbody>
-        {% for user in shift %}
-          <tr>
-              <th>{{ user.0 }}</th>
-                {% for hope in user.1 %}
-                  {% if hope == 1 %}
-                    <td>○</td>
-                  {% else %}
-                    <td>✖️</td>
-                  {% endif %}
-                {% endfor %}
-          </tr>
-        {% endfor %}
-    </tbody>
-  </table>
+<h1>{{ group.name }}</h1>
+
+<div class="card border-info mb-3">
+  <div class="card-body">
+    <h4 class="card-title"><a href="{% url 'shift_submit' group.pk %}" >シフト提出</a></h4>
+    <p class="card-text">シフトの提出（全員）</p>
+  </div>
 </div>
-  {% endfor %}
 
 
-<a href="{% url 'group_management' group.pk %}" class="btn btn-primary ml-2">シフト設定</a>
-<a href="{% url 'shift_submit' group.pk %}" class="btn btn-primary ml-2">シフト提出</a>
-<a href="{% url 'shift_create' group.pk %}" class="btn btn-primary ml-2">シフト作成</a>
-<a href="{% url 'shift_detail' group.pk %}" class="btn btn-primary ml-2">シフト詳細</a>
+<div class="card border-info mb-3">
+  <div class="card-body">
+    <h4 class="card-title"><a href="{% url 'shift_detail' group.pk %}" >シフト詳細を提出する</a></h4>
+    <p class="card-text">シフトの量など希望があれば提出（全員）</p>
+  </div>
+</div>
+<div class="card border-info mb-3">
+  <div class="card-body">
+    <h4 class="card-title"><a href="{% url 'shift_show' group.pk %}">シフト提出状況を見る</a></h4>
+    <p class="card-text">シフト提出状況を見る（全員）</p>
+  </div>
+</div>
+
+<div class="card border-danger mb-3">
+  <div class="card-body">
+    <h4 class="card-title"><a href="{% url 'management' group.pk %}" >シフト設定</a></h4>
+    <p class="card-text">シフト作成に関する設定を行うページ（管理者のみ）</p>
+</div>
+</div>
+
+<div class="card border-danger mb-3">
+  <div class="card-body">
+    <h4 class="card-title"><a href="{% url 'shift_create' group.pk %}">シフト作成</a></h4>
+    <p class="card-text">シフトの作成（管理者のみ）</p>
+  </div>
+</div>
+
 
 {% endblock %}

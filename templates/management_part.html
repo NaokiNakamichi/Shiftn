@@ -9,21 +9,18 @@
   <thead class="thead-inverse">
     <tr>
       <th>日にち</th>
-      <th>希望</th>
+      <th>パート数</th>
     </tr>
   </thead>
   <tbody>
-<form action="{% url 'shift_submit' group.pk %}" method="post">
+<form action="{% url 'management_part' group.pk %}" method="post">
   {% for form in formset %}
   <tr>
     <td>
     {{ form.date.value }}日
-    {% if form.part.value == 1 %} （夜）
-    {% elif form.part.value == 2 %} （昼)
-    {% endif %}
     </td>
     <td>
-    {{ form.hope }}
+    {{ form.part }}
     </td>
 
     {% for field in form.hidden_fields %}
@@ -37,5 +34,7 @@
   </table>
   <button type="submit" class="btn btn-primary btn-block">シフト設定作成</button>
 </form>
+
+
 
 {% endblock %}

@@ -21,13 +21,17 @@ from django.contrib.auth import views as auth_views
 from boards import views
 urlpatterns = [
     path('', views.home, name='home'),
+    path('boards/user_home',views.user_home,name='user_home'),
     path('boards/group_create',views.group_create,name='group_create'),
     path('boards/group_page/<int:pk>',views.group_page,name='group_page'),
+    path('boards/group_page/<int:pk>/shift_show',views.shift_show,name='shift_show'),
     path('boards/group_page/<int:pk>/submit/',views.shift_submit,name='shift_submit'),
     path('boards/group_page/<int:pk>/detail/',views.shift_detail,name='shift_detail'),
     path('boards/group_page/<int:pk>/create/',views.shift_create,name='shift_create'),
     path('boards/group_page/<int:pk>/management_detail/',views.management_detail,name='management_detail'),
-    path('boards/group_page/<int:pk>/management/',views.shift_management,name='group_management'),
+    path('boards/group_page/<int:pk>/management_part/',views.management_part,name='management_part'),
+    path('boards/group_page/<int:pk>/management_need/',views.management_need,name='management_need'),
+    path('boards/group_page/<int:pk>/management/',views.management,name='management'),
     path('boards/group_login/',views.group_login,name='group_login'),
     path('admin/', admin.site.urls),
     path('boards/<int:pk>/topics/<int:topic_pk>/reply/', views.reply_topic, name='reply_topic'),

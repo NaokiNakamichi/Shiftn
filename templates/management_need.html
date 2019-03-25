@@ -8,12 +8,12 @@
 <table class="table">
   <thead class="thead-inverse">
     <tr>
-      <th>日にち</th>
-      <th>希望</th>
+      <th>日にち(パート)</th>
+      <th>必要人数</th>
     </tr>
   </thead>
   <tbody>
-<form action="{% url 'shift_submit' group.pk %}" method="post">
+<form action="{% url 'management_need' group.pk %}" method="post">
   {% for form in formset %}
   <tr>
     <td>
@@ -23,7 +23,7 @@
     {% endif %}
     </td>
     <td>
-    {{ form.hope }}
+    {{ form.need }}
     </td>
 
     {% for field in form.hidden_fields %}

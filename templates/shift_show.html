@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign up to Django Boards{% endblock %}
+
+{% block content %}
+<h1> <a href="{% url 'group_page' group.pk %}">{{ group.name }}</a></h1>
+
+<!-- タブ部分 -->
+<ul id="myTab" class="nav nav-tabs" role="tablist">
+  <li class="nav-item">
+    <a href="#home" id="home-tab" class="nav-link active" role="tab" data-toggle="tab" aria-controls="home" aria-selected="true">ホーム</a>
+  </li>
+  <li class="nav-item">
+    <a href="#profile" id="profile-tab" class="nav-link" role="tab" data-toggle="tab" aria-controls="profile" aria-selected="false">プロフィール</a>
+  </li>
+</ul>
+
+<!-- パネル部分 -->
+<div id="myTabContent" class="tab-content mt-3">
+  <div id="home" class="tab-pane fade show active" role="tabpanel" aria-labelledby="home-tab">
+    {% for shift in shift_list %}
+    <div class="table-responsive">
+  　　<table class="table table-condensed table-bordered table-hover">
+        <thead>
+             <tr>
+                <th>{{month}}月</th>
+                {% for date in weekday_list %}
+                    {% if date.2  %}
+                      <th><span class="text-danger">{{ date.0 }}日({{ date.1 }})</span></th>
+                    {% else %}
+                      <th>{{ date.0 }}日({{ date.1 }})</th>
+                    {% endif %}
+                {% endfor %}
+             </tr>
+         </thead>
+         <tbody>
+          {% for user in shift %}
+            <tr>
+                <th scope="col" class="text-nowrap">{{ user.0 }}</th>
+                  {% for hope in user.1 %}
+                    {% if hope == 1 %}
+                      <td>○</td>
+                    {% else %}
+                      <td>✖️</td>
+                    {% endif %}
+                  {% endfor %}
+            </tr>
+          {% endfor %}
+      </tbody>
+    </table>
+  </div>
+    {% endfor %}
+  </div>
+
+  <div id="profile" class="tab-pane fade" role="tabpanel" aria-labelledby="profile-tab">
+    {% for shift in shift_list %}
+    <div class="table-responsive">
+  　　<table class="table table-condensed table-bordered table-hover">
+        <thead>
+             <tr>
+                <th>{{month}}月</th>
+                {% for date in weekday_list %}
+                    {% if date.2  %}
+                      <th><span class="text-danger">{{ date.0 }}日({{ date.1 }})</span></th>
+                    {% else %}
+                      <th>{{ date.0 }}日({{ date.1 }})</th>
+                    {% endif %}
+                {% endfor %}
+             </tr>
+         </thead>
+         <tbody>
+          {% for user in shift %}
+            <tr>
+                <th scope="col" class="text-nowrap">{{ user.0 }}</th>
+                  {% for hope in user.1 %}
+                    {% if hope == 1 %}
+                      <td>○</td>
+                    {% else %}
+                      <td>✖️</td>
+                    {% endif %}
+                  {% endfor %}
+            </tr>
+          {% endfor %}
+      </tbody>
+    </table>
+  </div>
+    {% endfor %}
+  </div>
+
+</div>
+
+
+
+
+
+
+{% endblock %}

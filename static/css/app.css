@@ -1,6 +1,7 @@
 html,
 body {
   height: 100%;
+  margin-bottom: 90px;
 }
 
 .navbar-brand {
