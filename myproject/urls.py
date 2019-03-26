@@ -22,6 +22,7 @@ from boards import views
 urlpatterns = [
     path('', views.home, name='home'),
     path('boards/user_home',views.user_home,name='user_home'),
+    path('boards/demand',views.demand,name='demand'),
     path('boards/group_create',views.group_create,name='group_create'),
     path('boards/group_page/<int:pk>',views.group_page,name='group_page'),
     path('boards/group_page/<int:pk>/shift_show',views.shift_show,name='shift_show'),

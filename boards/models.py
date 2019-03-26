@@ -9,7 +9,7 @@ GENDER_CHOICES = (
 
 SHIFT_HOPE = (
     (1, '入れる ○'),
-    (0, '入れない ✖︎'),
+    (0, '入れない ×'),
 )
 
 SHIFT_DEGREE = (
@@ -37,12 +37,7 @@ class Topic(models.Model):
     starter = models.ForeignKey(User,related_name='topics',on_delete=models.CASCADE)
 
 class Post(models.Model):
-    message = models.TextField(max_length=4000)
-    topic = models.ForeignKey(Topic, related_name='posts',on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(null=True)
-    created_by = models.ForeignKey(User, related_name='posts',on_delete=models.CASCADE)
-    updated_by = models.ForeignKey(User, null=True, related_name='+',on_delete=models.CASCADE)
+    message = models.TextField("要望、エラー報告",max_length=4000)
 
 class Department(models.Model): #グループ名、Userがどこのグループに所属しているかのModel
     name =  models.CharField(max_length=30, unique=True)
@@ -57,7 +52,7 @@ class Shift(models.Model): #シフトのModel。グループにおけるユー�
     month = models.IntegerField()
     date = models.IntegerField()
     part = models.IntegerField("セクション")
-    hope = models.IntegerField("希望",default=1, choices=SHIFT_HOPE, blank=True)
+    hope = models.IntegerField("希望",default=1, choices=SHIFT_HOPE)
     user = models.ForeignKey(User, on_delete = models.CASCADE)
     department = models.ForeignKey(Department, on_delete = models.CASCADE)
 

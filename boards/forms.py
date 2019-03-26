@@ -18,7 +18,7 @@ class NewTopicForm(forms.ModelForm):
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['message', ]
+        fields = ['message']
 
 class GroupCreateForm(forms.ModelForm):
     password = forms.CharField(max_length=32, widget=forms.PasswordInput)

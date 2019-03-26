@@ -16,6 +16,7 @@
 <form action="{% url 'shift_submit' group.pk %}" method="post">
   {% for form in formset %}
   <tr>
+    <div class="form-group">
     <td>
     {{ form.date.value }}日
     {% if form.part.value == 1 %} （夜）
@@ -23,9 +24,11 @@
     {% endif %}
     </td>
     <td>
+      <div class="form-control">
     {{ form.hope }}
+      </div>
     </td>
-
+    </div>
     {% for field in form.hidden_fields %}
       {{ field }}
     {% endfor %}
@@ -35,7 +38,7 @@
   {{ formset.management_form }}
   </tbody>
   </table>
-  <button type="submit" class="btn btn-primary btn-block">シフト設定作成</button>
+  <button type="submit" class="btn btn-primary btn-block">シフト提出</button>
 </form>
 
 {% endblock %}

@@ -8,10 +8,10 @@
 <!-- タブ部分 -->
 <ul id="myTab" class="nav nav-tabs" role="tablist">
   <li class="nav-item">
-    <a href="#home" id="home-tab" class="nav-link active" role="tab" data-toggle="tab" aria-controls="home" aria-selected="true">ホーム</a>
+    <a href="#home" id="home-tab" class="nav-link active" role="tab" data-toggle="tab" aria-controls="home" aria-selected="true">{{ month }}月</a>
   </li>
   <li class="nav-item">
-    <a href="#profile" id="profile-tab" class="nav-link" role="tab" data-toggle="tab" aria-controls="profile" aria-selected="false">プロフィール</a>
+    <a href="#profile" id="profile-tab" class="nav-link" role="tab" data-toggle="tab" aria-controls="profile" aria-selected="false">{{ pre_month }}月</a>
   </li>
 </ul>
 
@@ -44,6 +44,7 @@
                       <td>✖️</td>
                     {% endif %}
                   {% endfor %}
+                <th scope="col" class="text-nowrap">{{ user.0 }}</th>
             </tr>
           {% endfor %}
       </tbody>
@@ -53,13 +54,13 @@
   </div>
 
   <div id="profile" class="tab-pane fade" role="tabpanel" aria-labelledby="profile-tab">
-    {% for shift in shift_list %}
+    {% for shift in pre_shift_list %}
     <div class="table-responsive">
   　　<table class="table table-condensed table-bordered table-hover">
         <thead>
              <tr>
-                <th>{{month}}月</th>
-                {% for date in weekday_list %}
+                <th>{{ pre_month }}月</th>
+                {% for date in pre_weekday_list %}
                     {% if date.2  %}
                       <th><span class="text-danger">{{ date.0 }}日({{ date.1 }})</span></th>
                     {% else %}

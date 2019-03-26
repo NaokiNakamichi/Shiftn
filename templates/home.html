@@ -3,8 +3,32 @@
 {% block content %}
 
 
+<div class="card border-info mb-3">
+  <div class="card-body">
+    <h4 class="card-title"><a href="{% url 'user_home' %}">スタートページ</a></h4>
+    <p class="card-text">ログイン後はこちら</p>
+  </div>
+</div>
 
+<div class="card border-info mb-3">
+  <div class="card-body">
+    <h4 class="card-title"><a href="{% url 'login' %}" >ログイン</a></h4>
+    <p class="card-text">新規登録しているけどログインできていない人はこちら</p>
+  </div>
+</div>
 
+<div class="card border-info mb-3">
+  <div class="card-body">
+    <h4 class="card-title"><a href="{% url 'signup' %}">新規登録</a></h4>
+    <p class="card-text">初めてこのサイトを使う人はこちら</p>
+  </div>
+</div>
 
-  <a href="{% url 'user_home' %}" class="btn btn-primary ml-2">ユーザーページ</a>
+<div class="card border-info mb-3">
+  <div class="card-body">
+    <h4 class="card-title"><a href="{% url 'demand' %}">このページの使い方・要望</a></h4>
+    <p class="card-text">このサイトの詳しい使い方、または機能に関しての要望、エラー報告のある方はこちらから</p>
+  </div>
+</div>
+
 {% endblock %}

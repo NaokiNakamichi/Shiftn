@@ -7,7 +7,7 @@
     <div class="col-lg-4 col-md-6 col-sm-8">
       <div class="card">
         <div class="card-body">
-          <h3 class="card-title">Log in</h3>
+          <h3 class="card-title">ログイン</h3>
           <form method="post" novalidate>
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ next }}">
@@ -16,13 +16,8 @@
           </form>
         </div>
         <div class="card-footer text-muted text-center">
-          New to Django Boards? <a href="{% url 'signup' %}">Sign up</a>
+          <a href="{% url 'signup' %}">新規登録はこちら</a>
         </div>
-      </div>
-      <div class="text-center py-2">
-        <small>
-          <a href="#" class="text-muted">Forgot your password?</a>
-        </small>
       </div>
     </div>
   </div>

@@ -55,7 +55,7 @@ AUTH_USER_MODEL = 'accounts.User'
 
 ROOT_URLCONF = 'myproject.urls'
 LOGOUT_REDIRECT_URL = 'home'
-LOGIN_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = 'user_home'
 LOGIN_URL = 'login'
 SHELL_PLUS = "ipython"
 TEMPLATES = [

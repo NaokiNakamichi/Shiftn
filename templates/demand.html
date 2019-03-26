@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}使い方{% endblock %}
+
+
+{% block content %}
+<h2> このサイトの基本的な使い方 </h2>
+<p>調整中</p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include 'includes/form.html' %}
+    <button type="submit" class="btn btn-success">Post</button>
+  </form>
+{% endblock %}

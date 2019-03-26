@@ -10,7 +10,9 @@
       {% csrf_token %}
       <div class="form-group">
         <label>{{ form.degree.label_tag }}</label>
+        <div class="form-control">
         {{ form.degree }}
+        </div>
       </div>
       <div class="form-group">
         <label>{{ form.comment.label_tag }}</label>

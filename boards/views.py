@@ -16,6 +16,19 @@ w_list = ['月', '火', '水', '木', '金', '土', '日']
 def home(request):
     return render(request, 'home.html')
 
+def demand(request):
+    if request.method == 'POST':
+        form = PostForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.save()
+            messages.success(request,'投稿に成功しました')
+            return redirect('demand')
+
+    else:
+        form = PostForm()
+    return render(request, 'demand.html', {'form': form})
+
 @login_required
 def user_home(request):
     user = request.user
@@ -51,6 +64,7 @@ def current_month_plus():
     month = datetime.datetime.now().month + 1
     if month == 13:
         month = 1
+        year = year + 1
     _, lastday = calendar.monthrange(year,month)
     current_month_plus = [year,month,lastday]
     return current_month_plus
@@ -67,9 +81,9 @@ def group_page(request,pk):
     if Management.objects.\
     filter(year=year,month=month,department=group).exists() == False: #Managementモデルがまだ存在しなければシフト希望は表示しない
         return render(request,'group_page.html',{'group':group})
-    shift_list = shift_list_create(user,group)
+    shift_list = shift_list_create(user,group,year,month)
     date_list = range(1,lastday+1) #１から月の最後の日までのリスト
-    weekday_list = weekday_list_create()
+    weekday_list = weekday_list_create(year,month,lastday)
     params ={
             'group':group,
             'shift_list':shift_list,
@@ -78,9 +92,7 @@ def group_page(request,pk):
             }
     return render(request,'group_page.html',params)
 
-def shift_list_create(user,group): # シフトを表示させるためのリストを作成
-    current_month = current_month_plus()
-    year,month,lastday = current_month[0],current_month[1],current_month[2]
+def shift_list_create(user,group,year,month): # シフトを表示させるためのリストを作成
     if Management.objects.filter(year=year,month=month,department=group).exists() == False:
         shift_list = []
         return shift_list
@@ -101,9 +113,7 @@ def shift_list_create(user,group): # シフトを表示させるためのリス�
         shift_list.append(kari_list)
     return shift_list
 
-def weekday_list_create():
-    current_month = current_month_plus()
-    year,month,lastday = current_month[0],current_month[1],current_month[2]
+def weekday_list_create(year,month,lastday):
     date_list = range(1,lastday+1) #１から月の最後の日までのリスト
     weekday_list = []
     for week_day in date_list:
@@ -136,15 +146,16 @@ def management(request,pk):
 def management_part(request,pk):
     group = get_object_or_404(Department, pk=pk)
     user = request.user
-    weekday_list = weekday_list_create()
+    current_month = current_month_plus()
+    year,month,lastday = current_month[0],current_month[1],current_month[2]
+    weekday_list = weekday_list_create(year,month,lastday)
     if group_login_check(user,group) == False:
         messages.error(request, 'グループにログインしてください')
         return redirect('group_login')
     if group.created_by != user:
         messages.error(request, '管理者権限がありません')
         return redirect('group_page',pk = pk)
-    current_month = current_month_plus()
-    year,month,lastday = current_month[0],current_month[1],current_month[2]
+
     obj = Management.objects.filter(year=year,month=month,department=group)
     if obj.exists() == False: #グループのシフトの設定がなければ1ヶ月分の設定を新しく作成
         date = range(1, lastday+1)
@@ -182,16 +193,17 @@ def management_part(request,pk):
 def management_need(request,pk):
     group = get_object_or_404(Department, pk=pk)
     user = request.user
-    weekday_list = weekday_list_create()
-    shift_list = shift_list_create(user,group)
+    current_month = current_month_plus()
+    year,month,lastday = current_month[0],current_month[1],current_month[2]
+    weekday_list = weekday_list_create(year,month,lastday)
+    shift_list = shift_list_create(user,group,year,month)
     if group_login_check(user,group) == False:
         messages.error(request, 'グループにログインしてください')
         return redirect('group_login')
     if group.created_by != user:
         messages.error(request, '管理者権限がありません')
         return redirect('group_page',pk=pk)
-    current_month = current_month_plus()
-    year,month,lastday = current_month[0],current_month[1],current_month[2]
+
     obj = Management.objects.filter(year=year,month=month,department=group)
     if obj.exists() == False:
         messages.error(request, '先にパート数を設定してください')
@@ -278,14 +290,22 @@ def shift_show(request,pk):
     if Management.objects.\
     filter(year=year,month=month,department=group).exists() == False: #Managementモデルがまだ存在しなければシフト希望は表示しない
         return render(request,'shift_show.html',{'group':group})
-    shift_list = shift_list_create(user,group)
+    shift_list = shift_list_create(user,group,year,month)
+    pre_month = datetime.datetime.now().month
+    pre_year = datetime.datetime.now().year
+    _, pre_lastday = calendar.monthrange(pre_year,pre_month)
+    pre_shift_list = shift_list_create(user,group,pre_year,pre_month)
     date_list = range(1,lastday+1) #１から月の最後の日までのリスト
-    weekday_list = weekday_list_create()
+    weekday_list = weekday_list_create(year,month,lastday)
+    pre_weekday_list = weekday_list_create(pre_year,pre_month,pre_lastday)
     params ={
             'group':group,
             'shift_list':shift_list,
+            'pre_shift_list':pre_shift_list,
             'weekday_list':weekday_list,
-            'month':month
+            'pre_weekday_list':pre_weekday_list,
+            'month':month,
+            'pre_month':pre_month
             }
     return render(request,'shift_show.html',params)
 
@@ -294,13 +314,12 @@ def shift_show(request,pk):
 def shift_submit(request,pk):
     group = get_object_or_404(Department, pk=pk)
     user = request.user
-    weekday_list = weekday_list_create()
+    current_month = current_month_plus()
+    year,month,lastday = current_month[0],current_month[1],current_month[2]
+    weekday_list = weekday_list_create(year,month,lastday)
     if group_login_check(user,group) == False:
         messages.error(request, 'グループにログインしてください')
         return redirect('group_login')
-
-    current_month = current_month_plus()
-    year,month,lastday = current_month[0],current_month[1],current_month[2]
     si = Shift.objects.filter(year=year,month=month,department=group,user=user)
     obj = Management.objects.filter(year=year,month=month,department=group)
     if obj.exists() == False:
@@ -329,7 +348,7 @@ def shift_submit(request,pk):
         formset = ShiftSubmitFormSet(request.POST)
         if formset.is_valid():
             formset.save()
-            shift_list = shift_list_create(user,group)
+            shift_list = shift_list_create(user,group,year,month)
             date_list = range(1,lastday+1)
             params = {
                 'group':group,
@@ -340,6 +359,7 @@ def shift_submit(request,pk):
             }
             if ShiftDetail.objects.filter(year=year,month=month,department=group,user=user).exists() == False:
                 ShiftDetail.objects.create(year=year,month=month,department=group,user=user)
+            messages.success(request,'シフトの提出に成功しました')
             return render(request,'group_page.html',params)
         else:
             formset = ShiftSubmitFormSet(queryset = obj)
@@ -373,7 +393,7 @@ def shift_detail(request,pk):
         form = ShiftDetailForm(request.POST,instance=obj)
         if form.is_valid():
             form.save()
-            shift_list = shift_list_create(user,group)
+            shift_list = shift_list_create(user,group,year,month)
             date_list = range(1,lastday+1)
             params = {
                 'group':group,
@@ -382,6 +402,7 @@ def shift_detail(request,pk):
                 'weekday_list':weekday_list,
                 'month':month,
             }
+            messages.success(request,'設定に成功しました')
             return render(request,'group_page.html',params)
         else:
             form = ShiftDetailForm(instance=obj)
@@ -409,12 +430,12 @@ def shift_create(request,pk):
     user = request.user
     current_month = current_month_plus()
     year,month,lastday = current_month[0],current_month[1],current_month[2]
-    weekday_list = weekday_list_create()
+    weekday_list = weekday_list_create(year,month,lastday)
     if group_login_check(user,group) == False:
         messages.error(request, 'グループにログインしてください')
         return redirect('group_login')
 
-    shift_list = shift_list_create(user,group)
+    shift_list = shift_list_create(user,group,year,month)
     date_list = range(0,lastday)
     kari,user_list,m = [],[],[]
     #パートが一つの場合のみなので後で修正
@@ -587,22 +608,23 @@ def shift_create(request,pk):
 def management_detail(request,pk):
     group = get_object_or_404(Department, pk=pk)
     user = request.user
-    weekday_list = weekday_list_create()
+    current_month = current_month_plus()
+    year,month,lastday = current_month[0],current_month[1],current_month[2]
+    weekday_list = weekday_list_create(year,month,lastday)
     if group_login_check(user,group) == False:
         messages.error(request, 'グループにログインしてください')
         return redirect('group_login')
     if group.created_by != user:
         messages.error(request, '管理者権限がありません')
         return redirect('group_page',pk=pk)
-    current_month = current_month_plus()
-    year,month,lastday = current_month[0],current_month[1],current_month[2]
+
     obj,created = ManagementDetail.objects.get_or_create(relation=group,year=year,month=month)
 
     if request.method == 'POST':
         form = ManageDetailForm(request.POST,instance=obj)
         if form.is_valid():
             form.save()
-            shift_list = shift_list_create(user,group)
+            shift_list = shift_list_create(user,group,year,month)
             date_list = range(1,lastday+1)
             params = {
                 'group':group,
@@ -610,6 +632,7 @@ def management_detail(request,pk):
                 'weekday_list':weekday_list,
                 'month':month,
             }
+            messages.success(request,'設定の作成に成功しました')
             return render(request,'group_page.html',params)
         else:
             form = ManageDetailForm(instance=obj)
