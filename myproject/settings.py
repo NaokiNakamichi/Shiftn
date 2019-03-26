@@ -23,10 +23,15 @@ ALLOWED_HOSTS = ["0.0.0.0"]
 SECRET_KEY = ')tg(pa=o9&#6%sd#(m#_psdu-^apj8k!z@)vcqg4o4t=e6vkit'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-
-
+try:
+    from .local_settings import *
+except ImportError:
+    pass
+if not DEBUG:
+    import django_heroku
+    django_heroku.settings(locals())
 # Application definition
 
 INSTALLED_APPS = [
