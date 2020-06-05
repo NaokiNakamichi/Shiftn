@@ -7,7 +7,7 @@ verify_ssl = true
 
 [packages]
 pymysql = "*"
-django = "==2.1.2"
+django = "==2.2.13"
 django-widgets-improved = "*"
 django-extensions = "*"
 numpy = "*"
